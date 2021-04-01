@@ -70,7 +70,7 @@ sub usage {
         print "$msg\n";
     }
     print "usage: $0 --password=secret --plant=daisy [--since=31-Jan-2021] [--only-unread]\n";
-    print "usage: $0 --plant='Olearia traversii' [--debug]\n";
+    print "usage: $0 --test --plant='Olearia traversii' [--debug]\n";
     return;
 }
 
@@ -144,7 +144,7 @@ sub process {
         my $msg_data = get_msg( $imap, $msg_id );
 
         if ( should_move_msg( $msg_data, $plant, $summary ) ) {
-            $imap->move( [$msg_id] );
+            $imap->move( $move_to, [$msg_id] );
             $imap->expunge();
         } else {
             # if it wasn't seen before, then restore its 'unseen' status.
@@ -181,14 +181,14 @@ sub summarize {
         } keys %{$summary}
     ) {
         my $row = $summary->{$key};
-        print csvify( 
+        print csvify( [
             $row->{have}//'',
             $row->{count}//'',
             $row->{price}//'',
             $plant,
             $row->{msg_data}->{Date}//'',
             $row->{msg_data}->{From}//'',
-        ) . "\n";
+        ] ) . "\n";
     }
     return;
 }
