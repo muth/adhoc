@@ -1,8 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # Read mail from Inbox move into Parsed folder
 
 use strict;
+use warnings;
 use Mail::IMAPClient; # apt-get install libmail-imapclient-perl
 use Data::Dumper;
 use Getopt::Long;
@@ -11,13 +12,14 @@ main();
 exit;
 
 sub main {
-    my ($debug, $only_unread, $password, $plant, $since, $test);
+    my ($debug, $only_unread, $password, $plant, $save, $since, $test);
 
     GetOptions(
         "debug" => \$debug,
         "only-unread" => \$only_unread,
         "password=s" => \$password,
         "plant=s" => \$plant,
+        "save=s" => \$save,
         "since=s" => \$since,
         "test" => \$test,
     );
@@ -60,7 +62,7 @@ sub main {
     }
     push @search_args, ( 'SUBJECT', $plant );
 
-    process( $imap, $move_to, $plant, \@search_args );
+    process( $imap, $move_to, $plant, $save, \@search_args );
     return;
 }
 
@@ -69,7 +71,7 @@ sub usage {
     if ( $msg ) {
         print "$msg\n";
     }
-    print "usage: $0 --password=secret --plant=daisy [--since=31-Jan-2021] [--only-unread]\n";
+    print "usage: $0 --password=secret --plant=daisy [--save=output.csv] [--since=31-Jan-2021] [--only-unread]\n";
     print "usage: $0 --test --plant='Olearia traversii' [--debug]\n";
     return;
 }
@@ -128,7 +130,7 @@ sub get_msg {
 }
 
 sub process {
-    my ( $imap, $move_to, $plant, $search_args ) = @_;
+    my ( $imap, $move_to, $plant, $save, $search_args ) = @_;
     my $summary = {};
 
     my $msg_ids = search( $imap, $search_args );
@@ -161,16 +163,22 @@ sub process {
     }
 
     print "\n" if ( $need_newline );
-    summarize( $summary, $plant );
+    summarize( $plant, $save, $summary );
     return;
 }
 
 sub summarize {
-    my ($summary, $plant) = @_;
+    my ( $plant, $save, $summary ) = @_;
     return if not %{$summary};
 
+    my $fh;
+    if ( $save ) {
+	open($fh, '>', $save) || die "Could not create $save for writing. $!";
+    } else {
+	$fh = \*STDOUT;
+    }
     my $csv_header = csvify( [ qw(have count price plant date from) ] ) . "\n";
-    print $csv_header;
+    print {$fh} $csv_header;
 
     # iterate over messages by sender and then msg_id
     for my $key (sort
@@ -181,7 +189,7 @@ sub summarize {
         } keys %{$summary}
     ) {
         my $row = $summary->{$key};
-        print csvify( [
+        print {$fh} csvify( [
             $row->{have}//'',
             $row->{count}//'',
             $row->{price}//'',
