@@ -249,18 +249,6 @@ sub should_move_msg {
     return $move_it;
 }
 
-
-
-#/have/i, 'yes', 1
-#/don't/i, 'no', 2
-#/tall/i, 'yes', 1 #would size/tall be in a no?
-#
-#/don't have/i, 'no', 4
-#/do not have/i, 'no, 4
-#/sorry/i, 'no', 4
-#/for \$(\d+(.\d\d)?/i, 'yes', 6, sub { # store price}
-
-
 sub test_parsing {
     my ($debug, $plant) = @_;
 
