@@ -204,6 +204,9 @@ sub summarize {
             $row->{msg_data}->{From}//'',
         ] ) . "\n";
     }
+    if ( $save ) {
+        close($fh) || die "Faield to close $save. $!";
+    }
     return;
 }
 
@@ -287,11 +290,11 @@ sub test_parsing {
         
         if ( $debug ) {
             print "\n----\n";
-            print 'line          is ('.Dumper($line).")\n";
+            print 'line          is ('.$line.")\n";
             print 'details       is ('.Dumper($details).")\n";
-            print 'expect_have   is ('.Dumper($expect_have).")\n";
-            print 'expect_count  is ('.Dumper($expect_count).")\n";
-            print 'expect_price  is ('.Dumper($expect_price).")\n";
+            print 'expect_have   is ('.$expect_have.")\n";
+            print 'expect_count  is ('.$expect_count.")\n";
+            print 'expect_price  is ('.$expect_price.")\n";
         }
 
         if ( $expect_move ne $move_it_yn ) {
