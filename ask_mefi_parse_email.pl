@@ -1,6 +1,12 @@
 #!/usr/bin/perl
 
-# Read mail from Inbox move into Parsed folder
+# Reads mail from Inbox, moves parsed messges to a Parsed folder, prints a summary csv.
+# Only reads messages whose subject contains the plant specified by the --plant arg.
+# 
+# https://ask.metafilter.com/353374/Parsing-plant-orders-with-Perl
+#
+# Tested on Linux
+# Change email host/user on lines 50ish
 
 use strict;
 use warnings;
@@ -173,9 +179,9 @@ sub summarize {
 
     my $fh;
     if ( $save ) {
-	open($fh, '>', $save) || die "Could not create $save for writing. $!";
+        open($fh, '>', $save) || die "Could not create $save for writing. $!";
     } else {
-	$fh = \*STDOUT;
+        $fh = \*STDOUT;
     }
     my $csv_header = csvify( [ qw(have count price plant date from) ] ) . "\n";
     print {$fh} $csv_header;
