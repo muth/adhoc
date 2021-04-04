@@ -51,9 +51,15 @@ sub main {
     my $move_to = 'Parsed';
 
     my $imap = init_imap(
+
         host => 'mail.example.com',
         port => 143,
         user => 'user@example.com',
+
+#        host => 'outlook.office365.com',
+#        port => 993,
+#        user => 'debuglogin20210403@outlook.com',
+
         pass => $password,
         folder => 'Inbox',
     );
@@ -85,14 +91,20 @@ sub usage {
 sub init_imap {
     my (%args) = @_;
 
+    my $port = $args{port}||143;
+    my $ssl = $port == 993 ? 1 : 0;
     my $imap = Mail::IMAPClient->new(
+# If you have 2FA setup on outlook.com, then login may fail.
+# Set Debug => 1,
+# If in the debug output you see "NO LOGIN" then you may be out of luck.
         Debug => 0,
+        Ssl => $ssl,
         Server => $args{host},
-        Port => $args{port}||143,
+        Port => $port,
         User => $args{user},
         Password => $args{pass},
-        Timeout => $args{timeout}||120,
-    ) || die "Couldn't create IMAP client";
+        Timeout => $args{timeout}||30,
+    ) || die "Couldn't create IMAP client " . Dumper($@);
 
     $imap->select($args{folder}) ||
         die "Can't select IMAP folder" . $args{folder} . ':' . $!;
